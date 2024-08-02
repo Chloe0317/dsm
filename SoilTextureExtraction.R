@@ -63,9 +63,9 @@ state_capitals <- data.frame(
 clay.slga.r <- get_slga_texture("CLY", apikey)
 sand.slga.r <- get_slga_texture("SND", apikey)
 silt.slga.r <- get_slga_texture("SLT", apikey)
-clay_slga <- extract(clay, state_capitals[,3:4])
-sand_slga <- extract(sand, state_capitals[,3:4])
-silt_slga <- extract(silt, state_capitals[,3:4])
+clay_slga <- extract(clay.slga.r, state_capitals[,3:4])
+sand_slga <- extract(sand.slga.r, state_capitals[,3:4])
+silt_slga <- extract(silt.slga.r, state_capitals[,3:4])
 colnames(clay_slga)[2:7] <- colnames(sand_slga)[2:6] <- colnames(silt_slga)[2:6] <- soilDepth
 
 # WoSIS  SoilGrids----
