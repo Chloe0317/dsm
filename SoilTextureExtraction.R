@@ -12,8 +12,8 @@ get_slga_texture <- function(property, apikey){
   # the namestring is the last bit of naming convention for the texture maps
   namestring <- "EV_N_P_AU_TRN_N_20210902.tif"
   depths <- c("_000_005_", "_005_015_", "_015_030_", "_030_060_", "_060_100_", "_100_200_")
-  url1 <- paste0("/vsicurl/https://", apikey, "@data.tern.org.au/landscapes/slga/NationalMaps/SoilAndLandscapeGrid/")
-  url2 <- paste0(url1, property, "/", property, depths, namestring)
+  url1 <- paste0("/vsicurl/https://", apikey, "@data.tern.org.au/model-derived/slga/NationalMaps/SoilAndLandscapeGrid/")
+  url2 <- paste0(url1, property, "/v2/", property, depths, namestring)
   rast_list <- lapply(url2, rast)
   rastStack <- do.call(c, rast_list)
 }
@@ -66,7 +66,7 @@ silt.slga.r <- get_slga_texture("SLT", apikey)
 clay_slga <- extract(clay.slga.r, state_capitals[,3:4])
 sand_slga <- extract(sand.slga.r, state_capitals[,3:4])
 silt_slga <- extract(silt.slga.r, state_capitals[,3:4])
-colnames(clay_slga)[2:7] <- colnames(sand_slga)[2:6] <- colnames(silt_slga)[2:6] <- soilDepth
+colnames(clay_slga)[2:7] <- colnames(sand_slga)[2:7] <- colnames(silt_slga)[2:7] <- soilDepth
 
 # WoSIS  SoilGrids----
 # url https://soilgrids.org/

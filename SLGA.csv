@@ -1,0 +1,8 @@
+"SLGAProperty","Description","URL","Unit","Version"
+"BDW","Bulk density","EV_N_P_AU_TRN_N_20230607.tif","g/cm3",2
+"CLY","Clay","EV_N_P_AU_TRN_N_20210902.tif","%",2
+"SLT","Silt","EV_N_P_AU_TRN_N_20210902.tif","%",2
+"SND","Sand","EV_N_P_AU_TRN_N_20210902.tif","%",2
+"DUL","Drained upper limit","EV_N_P_AU_TRN_N_20210614.tif","%",1
+"L15","Lower limit","EV_N_P_AU_TRN_N_20210614.tif","%",1
+"PHW","pH in 1:5 soil water","EV_N_P_AU_TRN_N_20220520.tif","",1
