@@ -1,4 +1,4 @@
-# this is based on the get_isric_soil_profile function of Fernando Miguez, Eric Zurcher and Andrew Moore
+
 get_slga_soil_profile <- function(lonlat, 
                                    statistic = c("mean", "Q0.5"),
                                    soil.profile,
@@ -343,7 +343,7 @@ get_slga_soil <- function(latitude, longitude) {
     nitrogen = "https://esoil.io/TERNLandscapes/Public/Products/TERN/SLGA/NTO/NTO_000_005_EV_N_P_AU_NAT_C_20231101.tif",
     phh2o = "https://esoil.io/TERNLandscapes/Public/Products/TERN/SLGA/PHW/PHW_000_005_EV_N_P_AU_TRN_N_20220520.tif",
     cec = "https://esoil.io/TERNLandscapes/Public/Products/TERN/SLGA/CEC/CEC_000_005_EV_N_P_AU_TRN_N_20220826.tif",
-    des = "https://esoil.io/TERNLandscapes/Public/Products/TERN/SLGA/DES/DES_000_200_EV_N_P_AU_TRN_C_20190901.tif",
+    # des = "https://esoil.io/TERNLandscapes/Public/Products/TERN/SLGA/DES/DES_000_200_EV_N_P_AU_TRN_C_20190901.tif",
     soc = "https://esoil.io/TERNLandscapes/Public/Products/TERN/SLGA/SOC/SOC_000_005_EV_N_P_AU_TRN_N_20220727.tif"
   )
   
@@ -376,7 +376,7 @@ get_slga_soil <- function(latitude, longitude) {
       
       # Parse the response
       if (status_code(response) == 200) {
-        suppressMessages(fromJSON(content(response, "text")))
+        data <- fromJSON(content(response, "text"))
         property_results[i] <- data$Value  # Assign to vector
       } else {
         property_results[i] <- NA  # Handle errors gracefully
@@ -390,3 +390,4 @@ get_slga_soil <- function(latitude, longitude) {
   # Return the results
   return(results)
 }
+
