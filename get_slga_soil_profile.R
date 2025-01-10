@@ -1,4 +1,4 @@
-
+# this is based on the get_isric_soil_profile function of Fernando Miguez, Eric Zurcher and Andrew Moore
 get_slga_soil_profile <- function(lonlat, 
                                    statistic = c("mean", "Q0.5"),
                                    soil.profile,
