@@ -191,7 +191,7 @@ get_slga_soil_profile <- function(lonlat,
   alist$Country <- country
   alist$Longitude <- lon
   alist$Latitude <- lat
-  alist$DataSource <- paste("Original source is Soil and Landscape Grid of Australia www.isric.org. See: https://esoil.io/TERNLandscapes/Public/Pages/SLGA/index.html",Sys.time())
+  alist$DataSource <- paste("Original source is Soil and Landscape Grid of Australia See: https://esoil.io/TERNLandscapes/Public/Pages/SLGA/index.html",Sys.time())
   alist$Comments <- paste("resolution = 90 m",
                           "- taxonomic classification name =", txt_clss,
                           "- drainage class =", NA, 
