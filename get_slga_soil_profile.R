@@ -186,7 +186,7 @@ get_slga_soil_profile <- function(lonlat,
 
   #### Attributes ####
   alist <- list()
-  alist$SoilType <- paste("SoilType = ", txt_clss)
+  alist$SoilType <- paste("SoilType = ", txt_clss[1])
   alist$State <- state
   alist$Country <- country
   alist$Longitude <- lon
