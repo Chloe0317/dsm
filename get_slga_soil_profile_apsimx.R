@@ -557,7 +557,7 @@ soil_json <- function(template, soil.profile, soil.name){
   wschn <- grepl("Models.Soils.Chemical", soil.node0)
   soil.chemical.node <- soil.node0[wschn][[1]]
   
-  for(i in c("Depth", "Thickness", "PH")){
+  for(i in c("Depth", "Thickness", "PH", "CEC")){
     ## Format the variable
     tmp <- as.vector(soil.profile$soil[[i]], mode = "list")
     ## Replace the variable
