@@ -15,6 +15,7 @@ suppressPackageStartupMessages({
   library(jsonlite)
   library(curl)
   library(httr)
+  library(ithir)
   
 })
 
@@ -353,29 +354,43 @@ get_slga_soil_profile <- function(lonlat,
   
   
   if (new.soil) {
-    sp.xout <- cumsum(soil_profile$soil$Thickness)
-    
-    soil_profile$soil$BD <- approx_soil_variable(data.frame(x = cumsum(thcknss), y = slga[["bdod"]]), 
-                                                 xout = sp.xout, soil.bottom = soil.bottom, method = method, nlayers = nlayers)$y    
-    soil_profile$soil$Carbon <- approx_soil_variable(data.frame(x = cumsum(thcknss), y = slga[["soc"]]), 
-                                                     xout = sp.xout, soil.bottom = soil.bottom, method = method, nlayers = nlayers)$y    
-    soil_profile$soil$PH <- approx_soil_variable(data.frame(x = cumsum(thcknss), y = slga[["phh2o"]]), 
-                                                 xout = sp.xout, soil.bottom = soil.bottom, method = method, nlayers = nlayers)$y    
-    soil_profile$soil$ParticleSizeClay <- approx_soil_variable(data.frame(x = cumsum(thcknss), y = slga[["clay"]]), 
-                                                               xout = sp.xout, soil.bottom = soil.bottom, method = method, nlayers = nlayers)$y   
-    soil_profile$soil$ParticleSizeSand <- approx_soil_variable(data.frame(x = cumsum(thcknss), y = slga[["sand"]]), 
-                                                               xout = sp.xout, soil.bottom = soil.bottom, method = method, nlayers = nlayers)$y 
-    soil_profile$soil$ParticleSizeSilt <- approx_soil_variable(data.frame(x = cumsum(thcknss), y = slga[["silt"]]), 
-                                                               xout = sp.xout, soil.bottom = soil.bottom, method = method, nlayers = nlayers)$y 
-    soil_profile$soil$Nitrogen <- approx_soil_variable(data.frame(x = cumsum(thcknss), y = slga[["nitrogen"]]), 
-                                                       xout = sp.xout, soil.bottom = soil.bottom, method = method, nlayers = nlayers)$y   
-    soil_profile$soil$CEC <- approx_soil_variable(data.frame(x = cumsum(thcknss), y = slga[["cec"]]), 
-                                                  xout = sp.xout, soil.bottom = soil.bottom, method = method, nlayers = nlayers)$y 
-    
-    soil_profile$soil$DUL <- approx_soil_variable(data.frame(x = cumsum(thcknss), y = slga[["wv0033"]] ), 
-                                                  xout = sp.xout, soil.bottom = soil.bottom, method = method, nlayers = nlayers)$y * 1e-2  
-    soil_profile$soil$LL15 <- approx_soil_variable(data.frame(x = cumsum(thcknss), y = slga[["wv1500"]]), 
-                                                   xout = sp.xout, soil.bottom = soil.bottom, method = method, nlayers = nlayers)$y * 1e-2   
+    # rather than using approx function (apsimx R package method), use ea_spline since this was how the original data was transformed 
+    # Create data frame with GSM standard depth intervals
+    gsm_depths <- data.frame(
+      ID = 1,
+      UpperDepth = c(0, 5, 15, 30, 60, 100),
+      LowerDepth = c(5, 15, 30, 60, 100, 200)
+    )
+    # List of target variables and their SLGA names
+    soil_vars <- list(
+      BD = "bdod",
+      Carbon = "soc",
+      PH = "phh2o",
+      ParticleSizeClay = "clay",
+      ParticleSizeSand = "sand",
+      ParticleSizeSilt = "silt",
+      Nitrogen = "nitrogen",
+      CEC = "cec",
+      DUL = "wv0033",
+      LL15 = "wv1500"
+    )
+    # Loop over each variable and harmonise using ea_spline
+    for (var_name in names(soil_vars)) {
+      slga_col <- soil_vars[[var_name]]
+      raw_profile <- cbind.data.frame(gsm_depths, slga[[slga_col]])
+      colnames(raw_profile)[ncol(raw_profile)] <- var_name
+      ea_result <- ea_spline(raw_profile, var.name = var_name, d = c(0, cumsum(soil_profile$soil$Thickness) / 10),
+                             show.progress = F)$harmonised
+      harmonised_values <- as.numeric(ea_result[1, 2:(ncol(ea_result)-1)])  # remove ID, soil depth column
+      
+      # Apply scaling if necessary
+      if (slga_col %in% c("wv0033", "wv1500")) {
+        harmonised_values <- harmonised_values * 1e-2
+      }
+      
+      # Assign to soil_profile
+      soil_profile$soil[[var_name]] <- harmonised_values
+    }
   } else {
     soil_profile$soil$BD <- slga[["bdod"]]  # Bulk density
     soil_profile$soil$Carbon <- slga[["soc"]]  # Soil organic carbon
