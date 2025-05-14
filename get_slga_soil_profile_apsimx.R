@@ -222,6 +222,44 @@ calculate_SAT <- function(texture.class, BD) {
   return(SAT)
 }
 
+
+get_soildepth_point <- function(lon, lat) {
+  soildepth_url <- "https://esoil.io/TERNLandscapes/Public/Products/TERN/SLGA/DES/DES_000_200_EV_N_P_AU_TRN_C_20190901.tif"
+  
+  api_url <- paste0(
+    "https://esoil.io/TERNLandscapes/RasterProductsAPI/Drill?",
+    "format=json&verbose=false&COGPath=", URLencode(soildepth_url),
+    "&latitude=", lat, "&longitude=", lon
+  )
+  
+  response <- try(GET(api_url), silent = TRUE)
+  
+  if (inherits(response, "try-error") || status_code(response) != 200) {
+    return(NA_real_)
+  } else {
+    data <- fromJSON(content(response, "text", encoding = "UTF-8"))
+    return(data$Value * 1000)  # Convert from m to mm
+  }
+}
+
+generate_thickness <- function(soil_depth_mm) {
+  # this is the World modeller database default depths
+  default_thickness <- c(150, 150, 150, 150, 200, 200, 200, 200, 300, 300)
+  cumulative <- cumsum(default_thickness)
+  
+  # Find how many full layers fit within the soil depth
+  n_layers <- which(cumulative >= soil_depth_mm)[1]
+  
+  if (is.na(n_layers)) {
+    return(default_thickness)  # Use full depth if profile depth ≥ 2000 mm
+  } else {
+    thickness <- default_thickness[1:(n_layers - 1)]
+    remaining <- soil_depth_mm - sum(thickness)
+    thickness <- c(thickness, remaining)
+    return(thickness)
+  }
+}
+
 get_slga_soil <- function(latitude, longitude) {
   # Define properties
   properties <- list(
@@ -720,6 +758,23 @@ slga_depth_j <- soil_json(template_json, slga_depth, "SLGA_default_depth")
 skeleton_json$Children[[1]] <- WM_depth_j
 skeleton_json$Children[[2]] <- slga_depth_j
 
+
+# soil depth is also mapped in slga, use it to trancate the soil profile 
+
+depth <- get_soildepth_point(150.397, -28.127)
+
+template <- apsimx_soil_profile(
+  Thickness = generate_thickness(depth),
+  nlayers = length(generate_thickness(depth)),
+  crops = c("Wheat", "Sorghum", "Chickpea", "Mungbean",
+            "Canola", "Barley", "SCRUM",
+            "AGPWhiteClover", "Oats", "Lucerne")
+)
+WM_depth_truncated <- get_slga_soil_profile(c(150.397, -28.127), soil.profile = template)
+WM_depth_j_truncated <- soil_json(template_json, WM_depth_truncated, "SLGA_WM_depth")
+skeleton_json$Children[[3]] <- WM_depth_j_truncated
+
 write_json(skeleton_json, "slga_test.apsimx", 
            pretty = TRUE, digits = NA, auto_unbox = TRUE, , null = "null",
            na = "null")
+
